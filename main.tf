@@ -43,7 +43,7 @@ resource "aws_route_table" "public" {
   count  = length(var.public_subnet_cidr)
 
   tags = {
-    Name        = var.name + "-public-route-table"
+    Name        = "${var.name}-public-route-table"
     Environment = var.environment
     Zone        = "Public"
   }
