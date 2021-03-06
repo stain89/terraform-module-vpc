@@ -17,7 +17,7 @@ resource "aws_vpc" "main" {
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name        = var.name + "-ig"
+    Name        = "${var.name}-ig"
     Environment = var.environment
   }
 }
@@ -31,7 +31,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = var.name + "-public-subnet"
+    Name        = "${var.name}-public-subnet"
     Environment = var.environment
     Zone        = "Public"
   }
@@ -72,7 +72,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name        = var.name + "private-subnet"
+    Name        = "${var.name}-private-subnet"
     Environment = var.environment
     Zone        = "Private"
   }
@@ -83,7 +83,7 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   count  = length(var.private_subnet_cidr)
   tags = {
-    Name        = var.name + "-private-route-table"
+    Name        = "${var.name}-private-route-table"
     Environment = var.environment
     Zone        = "Private"
   }
@@ -93,7 +93,7 @@ resource "aws_route_table" "private" {
 resource "aws_eip" "nat_eip" {
   vpc = true
   tags = {
-    Name        = var.name + "-eip"
+    Name        = "${var.name}-eip"
     Environment = var.environment
   }
 }
@@ -103,7 +103,7 @@ resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = element(aws_subnet.private.*.id, 0)
   tags = {
-    Name        = var.name + "-nat"
+    Name        = "${var.name}-nat"
     Environment = var.environment
   }
 }
