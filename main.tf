@@ -1,5 +1,5 @@
 provider "aws" {
-  region  = var.aws_region
+  region = var.aws_region
 }
 # VPC
 resource "aws_vpc" "main" {
@@ -8,8 +8,8 @@ resource "aws_vpc" "main" {
   enable_dns_support   = "true"
 
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name
+    Environment = var.environment
   }
 }
 
@@ -17,8 +17,8 @@ resource "aws_vpc" "main" {
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name
+    Environment = var.environment
   }
 }
 
@@ -31,8 +31,8 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name
+    Environment = var.environment
     Zone        = "Public"
   }
 }
@@ -43,8 +43,8 @@ resource "aws_route_table" "public" {
   count  = length(var.public_subnet_cidr)
 
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name
+    Environment = var.environment
     Zone        = "Public"
     count       = length(var.public_subnet_cidr)
   }
@@ -73,8 +73,8 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name + "private-subnet"
+    Environment = var.environment
     Zone        = "Private"
   }
 }
@@ -84,8 +84,8 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   count  = length(var.private_subnet_cidr)
   tags = {
-    Name        = "var.name"
-    Environment = "var.environment"
+    Name        = var.name
+    Environment = var.environment
     Zone        = "Private"
     count       = length(var.public_subnet_cidr)
   }
@@ -112,7 +112,7 @@ resource "aws_route" "private_nat" {
 
 # Route Table Association
 resource "aws_route_table_association" "private" {
-  count          = length(var.public_subnet_cidr)
+  count          = length(var.private_subnet_cidr)
   route_table_id = element(aws_route_table.private.*.id, count.index)
   subnet_id      = element(aws_subnet.public.*.id, count.index)
 }
