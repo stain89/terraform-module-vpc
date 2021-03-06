@@ -8,7 +8,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = "true"
 
   tags = {
-    Name        = var.name
+    Name        = "${var.name}-vpc"
     Environment = var.environment
   }
 }
@@ -120,5 +120,5 @@ resource "aws_route" "private_nat" {
 resource "aws_route_table_association" "private" {
   count          = length(var.private_subnet_cidr)
   route_table_id = element(aws_route_table.private.*.id, count.index)
-  subnet_id      = element(aws_subnet.public.*.id, count.index)
+  subnet_id      = element(aws_subnet.private.*.id, count.index)
 }
