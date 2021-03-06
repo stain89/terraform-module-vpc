@@ -31,7 +31,7 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name        = var.name
+    Name        = var.name + "-public-subnet"
     Environment = var.environment
     Zone        = "Public"
   }
@@ -43,10 +43,9 @@ resource "aws_route_table" "public" {
   count  = length(var.public_subnet_cidr)
 
   tags = {
-    Name        = var.name
+    Name        = var.name + "-public-route-table"
     Environment = var.environment
     Zone        = "Public"
-    count       = length(var.public_subnet_cidr)
   }
 }
 
@@ -58,7 +57,7 @@ resource "aws_route" "public_ig" {
   gateway_id             = aws_internet_gateway.ig.id
 }
 
-# Route Table Association
+# Route Table Association with Public Subnet
 resource "aws_route_table_association" "public" {
   count          = length(var.public_subnet_cidr)
   route_table_id = element(aws_route_table.public.*.id, count.index)
@@ -84,22 +83,29 @@ resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
   count  = length(var.private_subnet_cidr)
   tags = {
-    Name        = var.name
+    Name        = var.name + "-private-route-table"
     Environment = var.environment
     Zone        = "Private"
-    count       = length(var.public_subnet_cidr)
   }
 }
 
 # Elastic IP for NAT Gateway
 resource "aws_eip" "nat_eip" {
   vpc = true
+  tags = {
+    Name        = var.name + "-eip"
+    Environment = var.environment
+  }
 }
 
 # NAT Gateway
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = element(aws_subnet.private.*.id, 0)
+  tags = {
+    Name        = var.name + "-nat"
+    Environment = var.environment
+  }
 }
 
 # Private Route to Internet Via NAT
@@ -110,7 +116,7 @@ resource "aws_route" "private_nat" {
   nat_gateway_id         = aws_nat_gateway.nat_gw.id
 }
 
-# Route Table Association
+# Route Table Association with Private Subnet
 resource "aws_route_table_association" "private" {
   count          = length(var.private_subnet_cidr)
   route_table_id = element(aws_route_table.private.*.id, count.index)
